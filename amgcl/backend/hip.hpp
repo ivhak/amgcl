@@ -110,30 +110,30 @@ struct hip_deleter {
         AMGCL_CALL_HIP( hipsparseDestroyMatDescr(handle) );
     }
 
-#if CUDART_VERSION < 11000
-    // void operator()(hipsparseHybMat_t handle) {
-    //     AMGCL_CALL_HIP( hipsparseDestroyHybMat(handle) );
-    // }
+#if defined(HIP_PLATFORM_NVCC) && CUDART_VERSION < 11000
+    void operator()(hipsparseHybMat_t handle) {
+        AMGCL_CALL_HIP( hipsparseDestroyHybMat(handle) );
+    }
 #endif
 
-    // void operator()(csrilu02Info_t handle) {
-    //     AMGCL_CALL_HIP( hipsparseDestroyCsrilu02Info(handle) );
-    // }
+    void operator()(csrilu02Info_t handle) {
+        AMGCL_CALL_HIP( hipsparseDestroyCsrilu02Info(handle) );
+    }
 
-    // void operator()(csrsv2Info_t handle) {
-    //     AMGCL_CALL_HIP( hipsparseDestroyCsrsv2Info(handle) );
-    // }
+    void operator()(csrsv2Info_t handle) {
+        AMGCL_CALL_HIP( hipsparseDestroyCsrsv2Info(handle) );
+    }
 
-    // void operator()(hipEvent_t handle) {
-    //     AMGCL_CALL_HIP( hipEventDestroy(handle) );
-    // }
+    void operator()(hipEvent_t handle) {
+        AMGCL_CALL_HIP( hipEventDestroy(handle) );
+    }
 };
 
 
 } // namespace detail
 
-#if CUDART_VERSION >= 11000
-/// CUSPARSE matrix in CSR format.
+#if defined(HIP_PLATFORM_NVCC) && CUDART_VERSION >= 11000
+/// hipSPARSE matrix in CSR format.
 template <typename real>
 class hip_matrix {
     public:
@@ -243,7 +243,7 @@ class hip_matrix {
 
 #else  // CUDART_VERSION >= 11000
 
-/// CUSPARSE matrix in Hyb format.
+/// hipSPARSE matrix in Hyb format.
 template <typename real>
 class hip_matrix {
     public:
@@ -373,7 +373,7 @@ class hip_matrix {
 
 /// HIP backend.
 /**
- * Uses CUSPARSE for matrix operations and Thrust for vector operations.
+ * Uses hipSPARSE for matrix operations and Thrust for vector operations.
  *
  * \param real Value type.
  * \ingroup backends
@@ -398,7 +398,7 @@ struct hip {
 
     /// Backend parameters.
     struct params {
-        /// CUSPARSE handle.
+        /// hipSPARSE handle.
         hipsparseHandle_t hipsparse_handle;
 
         params(hipsparseHandle_t handle = 0) : hipsparse_handle(handle) {}
